@@ -1,0 +1,26 @@
+name: ksoc-guard
+
+on: [ push ]
+
+jobs:
+  ksoc-guard:
+    permissions:
+      security-events: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: KSOC Guard
+        id: guard
+        uses: ksoclabs/guard-action@v0.0.10
+        with:
+          format: sarif
+          ksoc_account_id: 2KW0CKZCYADZH5AL7TuFyoaIlvh
+          ksoc_access_key_id: ${{ secrets.KSOC_ACCESS_KEY_ID }}
+          ksoc_secret_key: ${{ secrets.KSOC_SECRET_KEY }}
+      - name: Upload KSOC Guard SARIF Report
+        if: success() || failure()
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ${{ steps.guard.outputs.sarif }}
+          checkout_path: /github/workspace
